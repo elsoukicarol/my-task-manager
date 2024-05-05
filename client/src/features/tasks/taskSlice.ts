@@ -1,51 +1,57 @@
-/// In redux a "slice" is a collection of reducer logic and actions
-/// for a single feature of your app, in this case my feature is the Tasks entity
+import { createSlice } from "@reduxjs/toolkit";
+import { Tasks } from "../../data";
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../../app/store';
+const loadTasksFromLocalStorage = () => {
+  const savedTasks = localStorage.getItem('tasks');
+  return savedTasks ? JSON.parse(savedTasks) : [];
+};
 
-interface Task {
-  id: number;
-  name: string;
-  description: string;
-  completed: boolean;
-}
+const saveTasksToLocalStorage = (tasks : any) => {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+};
 
-interface TaskState {
-  tasks: Task[];
-}
-
-const initialState: TaskState = {
-  tasks: [],
+const initialState = {
+  tasks: loadTasksFromLocalStorage()
 };
 
 const taskSlice = createSlice({
-  name: 'tasks',
-  initialState,
+  name: "tasks",
+  initialState: Tasks,
   reducers: {
-    addTask: (state, action: PayloadAction<Task>) => {
-      state.tasks.push(action.payload);
+    addTask: (state, action) => {
+      state.push(action.payload);
+      saveTasksToLocalStorage(state); 
     },
-    removeTask: (state, action: PayloadAction<number>) => {
-      state.tasks = state.tasks.filter(task => task.id !== action.payload);
-    },
-    updateTask: (state, action: PayloadAction<Task>) => {
-      const index = state.tasks.findIndex(task => task.id === action.payload.id);
-      if (index !== -1) {
-        state.tasks[index] = action.payload;
+    updateTask: (state, action) => {
+      const { id, title, description, priority, completed } = action.payload;
+      const updateTask = state.find((task) => task.id === id);
+      if (updateTask) {
+        updateTask.title = title;
+        updateTask.description = description;
+        updateTask.completed = completed;
+        updateTask.priority = priority;
+        saveTasksToLocalStorage(state); 
       }
     },
-    toggleTaskCompletion: (state, action: PayloadAction<number>) => {
-      const index = state.tasks.findIndex(task => task.id === action.payload);
-      if (index !== -1) {
-        state.tasks[index].completed = !state.tasks[index].completed;
+    deleteTask: (state, action) => {
+      const {id} = action.payload;
+      const deleteTask = state.find((task) => task.id === id);
+      if (deleteTask) {
+        return state.filter(f => f.id !== id);
       }
+      saveTasksToLocalStorage(state); 
     },
+    setFilter: (state, action) => {
+      state.filter = action.payload; // Set the filter value
+    }
   },
 });
 
-export const { addTask, removeTask, updateTask, toggleTaskCompletion } = taskSlice.actions;
+// Selector to filter tasks by the current filter
+export const selectFilteredTasks = (state : any) => {
+  const { tasks, filter } = state.tasks;
+  return tasks.filter((task: { priority: any; }) => task.priority === filter);
+};
 
-export const selectTasks = (state: RootState) => state.tasks.tasks;
-
+export const { addTask, updateTask, deleteTask, setFilter } = taskSlice.actions;
 export default taskSlice.reducer;
