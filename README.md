@@ -1,4 +1,4 @@
-## Project Overview: Task Management Redux Slice
+## Project Overview: Task Management Redux
 
 This documentation provides an overview of the taskSlice created with Redux Toolkit. This slice manages a list of tasks, enabling operations such as adding, updating, deleting, and filtering tasks based on priority. Tasks are also persisted in local storage to maintain state across browser sessions.
 
@@ -16,8 +16,6 @@ The platform's main features include:
 - [Technologies Used](#technologies-used)
 - [Getting Started](#getting-started)
 - [Installation](#installation)
-- [Configuration](#configuration)
-- [API Endpoints](#api-endpoints)
 
 ## Demo
 
